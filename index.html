@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conceitos de LLM</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- React & ReactDOM (using esm.sh via importmap) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0?dev",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+            "lucide-react": "https://esm.sh/lucide-react@0.263.1?dev"
+        }
+    }
+    </script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Search, Brain, Sparkles, Zap, MessageSquare, ShieldCheck, Database, Layers, RefreshCw } from 'lucide-react';
+
+        const concepts = [
+            // Grupo 1: Fundamentos (Rosado/Vermelho)
+            {
+                title: "LLM",
+                description: "Um modelo que gera texto prevendo o próximo token mais provável.",
+                category: "foundations",
+                color: "bg-rose-100 border-rose-200 text-rose-900"
+            },
+            {
+                title: "Token",
+                description: "Um pedaço de texto, como uma palavra ou símbolo de pontuação.",
+                category: "foundations",
+                color: "bg-rose-100 border-rose-200 text-rose-900"
+            },
+            {
+                title: "Tokenization",
+                description: "Processo de conversão de texto em uma sequência de tokens.",
+                category: "foundations",
+                color: "bg-rose-100 border-rose-200 text-rose-900"
+            },
+            {
+                title: "Embeddings",
+                description: "Vetores numéricos que representam o significado dos tokens.",
+                category: "foundations",
+                color: "bg-rose-100 border-rose-200 text-rose-900"
+            },
+            {
+                title: "Latent Space",
+                description: "Espaço matemático onde os embeddings são organizados por significado.",
+                category: "foundations",
+                color: "bg-rose-100 border-rose-200 text-rose-900"
+            },
+            {
+                title: "Parameters",
+                description: "Variáveis internas que armazenam os padrões aprendidos pelo modelo.",
+                category: "foundations",
+                color: "bg-rose-100 border-rose-200 text-rose-900"
+            },
+
+            // Grupo 2: Treinamento (Amarelo/Bege)
+            {
+                title: "Pre-training",
+                description: "Treinamento em dados de texto massivos para aprender padrões de linguagem.",
+                category: "training",
+                color: "bg-amber-100 border-amber-200 text-amber-900"
+            },
+            {
+                title: "Base Model",
+                description: "Um modelo pré-treinado que prevê texto, mas não segue instruções.",
+                category: "training",
+                color: "bg-amber-100 border-amber-200 text-amber-900"
+            },
+            {
+                title: "Instruct Model",
+                description: "Um modelo base treinado adicionalmente para seguir instruções e responder de forma útil.",
+                category: "training",
+                color: "bg-amber-100 border-amber-200 text-amber-900"
+            },
+            {
+                title: "Fine-Tuning",
+                description: "Treinamento adicional em um conjunto de dados menor para moldar o comportamento do modelo.",
+                category: "training",
+                color: "bg-amber-100 border-amber-200 text-amber-900"
+            },
+            {
+                title: "Alignment",
+                description: "Garantir que o comportamento do modelo seja útil, honesto e inofensivo.",
+                category: "training",
+                color: "bg-amber-100 border-amber-200 text-amber-900"
+            },
+            {
+                title: "RLHF",
+                description: "Uso de respostas classificadas por humanos para guiar o comportamento do modelo.",
+                category: "training",
+                color: "bg-amber-100 border-amber-200 text-amber-900"
+            },
+
+            // Grupo 3: Prompts e Contexto (Azul/Cinza)
+            {
+                title: "Prompt",
+                description: "Entrada completa enviada ao modelo, incluindo instruções e contexto.",
+                category: "prompting",
+                color: "bg-sky-100 border-sky-200 text-sky-900"
+            },
+            {
+                title: "System Prompt",
+                description: "Instruções de alto nível que definem o papel e os limites do modelo.",
+                category: "prompting",
+                color: "bg-sky-100 border-sky-200 text-sky-900"
+            },
+            {
+                title: "User Prompt",
+                description: "Pergunta ou instrução específica fornecida pelo usuário.",
+                category: "prompting",
+                color: "bg-sky-100 border-sky-200 text-sky-900"
+            },
+            {
+                title: "Context Window",
+                description: "Número máximo de tokens que o modelo pode processar de uma vez.",
+                category: "prompting",
+                color: "bg-sky-100 border-sky-200 text-sky-900"
+            },
+            {
+                title: "Zero-Shot Learning",
+                description: "Realização de uma tarefa sem exemplos no prompt.",
+                category: "prompting",
+                color: "bg-sky-100 border-sky-200 text-sky-900"
+            },
+            {
+                title: "Few-Shot Learning",
+                description: "Inclusão de exemplos no prompt para guiar o formato ou comportamento da saída.",
+                category: "prompting",
+                color: "bg-sky-100 border-sky-200 text-sky-900"
+            },
+
+            // Grupo 4: Inferência e Parâmetros (Roxo/Lilás)
+            {
+                title: "Chain of Thought",
+                description: "Solicitar ao modelo que mostre o raciocínio passo a passo.",
+                category: "inference",
+                color: "bg-purple-100 border-purple-200 text-purple-900"
+            },
+            {
+                title: "Inference",
+                description: "Processo de geração de tokens de saída a partir de um modelo treinado.",
+                category: "inference",
+                color: "bg-purple-100 border-purple-200 text-purple-900"
+            },
+            {
+                title: "Latency",
+                description: "Tempo entre o envio de um prompt e o recebimento da saída.",
+                category: "inference",
+                color: "bg-purple-100 border-purple-200 text-purple-900"
+            },
+            {
+                title: "Temperature",
+                description: "Um parâmetro que controla a aleatoriedade na seleção de tokens.",
+                category: "inference",
+                color: "bg-purple-100 border-purple-200 text-purple-900"
+            },
+            {
+                title: "Hallucination",
+                description: "Geração confiante de informações incorretas ou fabricadas.",
+                category: "inference",
+                color: "bg-purple-100 border-purple-200 text-purple-900"
+            },
+            {
+                title: "Grounding",
+                description: "Restrição das saídas a informações fornecidas ou verificáveis.",
+                category: "inference",
+                color: "bg-purple-100 border-purple-200 text-purple-900"
+            },
+
+            // Grupo 5: Avançado e Aplicação (Verde)
+            {
+                title: "RAG",
+                description: "Recuperação de dados externos e adição ao prompt antes da geração.",
+                category: "application",
+                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+            },
+            {
+                title: "Workflow",
+                description: "Uma sequência fixa e predefinida onde o LLM segue passos estabelecidos.",
+                category: "application",
+                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+            },
+            {
+                title: "Agent",
+                description: "Um sistema onde o LLM planeja ações, depois escolhe dinamicamente passos e ferramentas.",
+                category: "application",
+                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+            },
+            {
+                title: "Multimodality",
+                description: "Capacidade de processar múltiplos tipos de entrada, como texto e imagens.",
+                category: "application",
+                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+            },
+            {
+                title: "Benchmarks",
+                description: "Testes padronizados usados para comparar as capacidades do modelo.",
+                category: "application",
+                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+            },
+            {
+                title: "Guardrails",
+                description: "Sistemas que bloqueiam entradas e saídas inseguras ou inapropriadas.",
+                category: "application",
+                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+            }
+        ];
+
+        const FlipCard = ({ item }) => {
+            const [isFlipped, setIsFlipped] = useState(false);
+
+            return (
+                <div className="group h-48 w-full cursor-pointer [perspective:1000px]" onClick={() => setIsFlipped(!isFlipped)}>
+                    <div className={`relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] shadow-md hover:shadow-xl rounded-2xl ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+                        {/* Front Side */}
+                        <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 text-center rounded-2xl border-2 [backface-visibility:hidden] ${item.color}`}>
+                            <div className="mb-2 opacity-50">
+                                <Sparkles size={20} />
+                            </div>
+                            <h3 className="text-xl font-bold tracking-tight">{item.title}</h3>
+                            <p className="mt-4 text-xs font-semibold uppercase opacity-60">Toque para ver a definição</p>
+                        </div>
+
+                        {/* Back Side */}
+                        <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center rounded-2xl border-2 bg-white text-slate-800 [transform:rotateY(180deg)] [backface-visibility:hidden]`}>
+                            <p className="text-md font-medium leading-relaxed">{item.description}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        function App() {
+            const [searchTerm, setSearchTerm] = useState('');
+
+            const filteredConcepts = concepts.filter(c =>
+                c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                c.description.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            return (
+                <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12">
+                    {/* Header */}
+                    <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-indigo-600 p-2 rounded-lg text-white">
+                                        <Brain size={24} />
+                                    </div>
+                                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                                        30 Conceitos de LLM
+                                    </h1>
+                                </div>
+
+                                <div className="relative w-full md:w-96">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                        <Search size={18} />
+                                    </div>
+                                    <input type="text" placeholder="Buscar conceito ou definição..."
+                                        className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-full leading-5 bg-slate-100 placeholder-slate-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out sm:text-sm"
+                                        value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Grid */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+                        {/* Intro Text */}
+                        <div className="mb-8 text-center max-w-2xl mx-auto">
+                            <h2 className="text-lg text-slate-600">
+                                Explore os fundamentos da Inteligência Artificial Generativa.
+                            </h2>
+                            <p className="text-sm text-slate-400 mt-2">Clique nos cartões para revelar o significado.</p>
+                        </div>
+
+                        {/* Categories Legend */}
+                        <div className="flex flex-wrap justify-center gap-3 mb-8 text-xs font-medium text-slate-500">
+                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-rose-400"></span> Fundamentos</span>
+                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-amber-400"></span> Treinamento</span>
+                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-sky-400"></span> Prompts</span>
+                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-400"></span> Inferência</span>
+                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-400"></span> Aplicação</span>
+                        </div>
+
+                        {filteredConcepts.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredConcepts.map((item, index) => (
+                                    <FlipCard key={index} item={item} />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-20 text-slate-400">
+                                <Search size={48} className="mx-auto mb-4 opacity-20" />
+                                <p className="text-lg">Nenhum conceito encontrado para "{searchTerm}"</p>
+                                <button onClick={() => setSearchTerm('')}
+                                    className="mt-4 text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-2 mx-auto"
+                                >
+                                    <RefreshCw size={16} /> Limpar busca
+                                </button>
+                            </div>
+                        )}
+                    </main>
+
+                    <footer className="max-w-7xl mx-auto px-4 py-6 text-center text-slate-400 text-sm border-t border-slate-200 mt-8">
+                        <p>© 2026 Guia LLM Interativo.</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = createRoot(rootElement);
+            root.render(<App />);
+        }
+    </script>
+</body>
+
+</html>
+```
