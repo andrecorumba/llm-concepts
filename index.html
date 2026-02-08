@@ -12,13 +12,64 @@
             theme: {
                 extend: {
                     colors: {
-                        clifford: '#da373d',
+                        neonPink: '#ff2d95',
+                        neonCyan: '#00f0ff',
+                        neonGreen: '#39ff14',
+                        neonPurple: '#bf5fff',
+                        neonYellow: '#ffe600',
+                        neonOrange: '#ff6a00',
+                        darkBg: '#0a0a0f',
+                        darkCard: '#12121a',
+                        darkSurface: '#1a1a2e',
                     }
                 }
             }
         }
     </script>
-    <!-- React & ReactDOM (using esm.sh via importmap) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+
+        .neon-glow-pink { box-shadow: 0 0 15px rgba(255, 45, 149, 0.3), inset 0 0 15px rgba(255, 45, 149, 0.05); }
+        .neon-glow-cyan { box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.05); }
+        .neon-glow-green { box-shadow: 0 0 15px rgba(57, 255, 20, 0.3), inset 0 0 15px rgba(57, 255, 20, 0.05); }
+        .neon-glow-purple { box-shadow: 0 0 15px rgba(191, 95, 255, 0.3), inset 0 0 15px rgba(191, 95, 255, 0.05); }
+        .neon-glow-yellow { box-shadow: 0 0 15px rgba(255, 230, 0, 0.3), inset 0 0 15px rgba(255, 230, 0, 0.05); }
+
+        .neon-glow-pink:hover { box-shadow: 0 0 25px rgba(255, 45, 149, 0.5), inset 0 0 25px rgba(255, 45, 149, 0.1); }
+        .neon-glow-cyan:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.5), inset 0 0 25px rgba(0, 240, 255, 0.1); }
+        .neon-glow-green:hover { box-shadow: 0 0 25px rgba(57, 255, 20, 0.5), inset 0 0 25px rgba(57, 255, 20, 0.1); }
+        .neon-glow-purple:hover { box-shadow: 0 0 25px rgba(191, 95, 255, 0.5), inset 0 0 25px rgba(191, 95, 255, 0.1); }
+        .neon-glow-yellow:hover { box-shadow: 0 0 25px rgba(255, 230, 0, 0.5), inset 0 0 25px rgba(255, 230, 0, 0.1); }
+
+        .neon-text-pink { color: #ff2d95; text-shadow: 0 0 10px rgba(255, 45, 149, 0.5); }
+        .neon-text-cyan { color: #00f0ff; text-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        .neon-text-green { color: #39ff14; text-shadow: 0 0 10px rgba(57, 255, 20, 0.5); }
+        .neon-text-purple { color: #bf5fff; text-shadow: 0 0 10px rgba(191, 95, 255, 0.5); }
+        .neon-text-yellow { color: #ffe600; text-shadow: 0 0 10px rgba(255, 230, 0, 0.5); }
+
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Custom scrollbar for modal */
+        .modal-scroll::-webkit-scrollbar { width: 6px; }
+        .modal-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        .modal-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    </style>
+    <!-- React & ReactDOM -->
     <script type="importmap">
     {
         "imports": {
@@ -28,228 +79,813 @@
         }
     }
     </script>
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-darkBg text-gray-100">
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-        import React, { useState } from 'react';
+        import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Search, Brain, Sparkles, Zap, MessageSquare, ShieldCheck, Database, Layers, RefreshCw, Github } from 'lucide-react';
+        import { Search, Brain, Sparkles, X, ExternalLink, RefreshCw, Github, BookOpen, ChevronRight, Lightbulb, Code, ArrowRight } from 'lucide-react';
+
+        const categoryConfig = {
+            foundations: {
+                label: "Fundamentos",
+                neonColor: "#ff2d95",
+                glowClass: "neon-glow-pink",
+                textClass: "neon-text-pink",
+                borderColor: "border-neonPink/30",
+                bgColor: "bg-neonPink/10",
+                dotColor: "bg-neonPink",
+            },
+            training: {
+                label: "Treinamento",
+                neonColor: "#ffe600",
+                glowClass: "neon-glow-yellow",
+                textClass: "neon-text-yellow",
+                borderColor: "border-neonYellow/30",
+                bgColor: "bg-neonYellow/10",
+                dotColor: "bg-neonYellow",
+            },
+            prompting: {
+                label: "Prompts",
+                neonColor: "#00f0ff",
+                glowClass: "neon-glow-cyan",
+                textClass: "neon-text-cyan",
+                borderColor: "border-neonCyan/30",
+                bgColor: "bg-neonCyan/10",
+                dotColor: "bg-neonCyan",
+            },
+            inference: {
+                label: "Inferência",
+                neonColor: "#bf5fff",
+                glowClass: "neon-glow-purple",
+                textClass: "neon-text-purple",
+                borderColor: "border-neonPurple/30",
+                bgColor: "bg-neonPurple/10",
+                dotColor: "bg-neonPurple",
+            },
+            application: {
+                label: "Aplicação",
+                neonColor: "#39ff14",
+                glowClass: "neon-glow-green",
+                textClass: "neon-text-green",
+                borderColor: "border-neonGreen/30",
+                bgColor: "bg-neonGreen/10",
+                dotColor: "bg-neonGreen",
+            },
+        };
 
         const concepts = [
-            // Grupo 1: Fundamentos (Rosado/Vermelho)
+            // Fundamentos
             {
                 title: "LLM",
                 description: "Um modelo que gera texto prevendo o próximo token mais provável.",
                 category: "foundations",
-                color: "bg-rose-100 border-rose-200 text-rose-900"
+                details: {
+                    fullDescription: "LLM (Large Language Model) é um tipo de modelo de inteligência artificial treinado em enormes quantidades de texto para compreender e gerar linguagem natural. Esses modelos utilizam arquiteturas de redes neurais profundas, principalmente baseadas em Transformers, com bilhões de parâmetros.",
+                    howItWorks: "O modelo processa texto convertendo-o em tokens, que passam por múltiplas camadas de atenção (attention layers). Cada camada aprende diferentes aspectos da linguagem — desde gramática básica até raciocínio complexo. Na geração, o modelo prevê o próximo token mais provável dado o contexto anterior, repetindo esse processo token por token.",
+                    examples: [
+                        "GPT-4, Claude, LLaMA e Gemini são exemplos de LLMs modernos",
+                        "Um LLM pode completar frases, responder perguntas, traduzir idiomas e escrever código",
+                        "Modelos menores como Phi-3 e Mistral 7B demonstram que eficiência também importa"
+                    ],
+                    keyPoints: [
+                        "Baseados na arquitetura Transformer (2017)",
+                        "Treinados em trilhões de tokens de texto",
+                        "Capacidades emergentes surgem com escala",
+                        "Podem ser especializados via fine-tuning"
+                    ]
+                }
             },
             {
                 title: "Token",
                 description: "Um pedaço de texto, como uma palavra ou símbolo de pontuação.",
                 category: "foundations",
-                color: "bg-rose-100 border-rose-200 text-rose-900"
+                details: {
+                    fullDescription: "Tokens são as unidades fundamentais que os LLMs processam. Em vez de trabalhar com caracteres individuais ou palavras completas, os modelos dividem o texto em pedaços otimizados chamados tokens. Um token pode ser uma palavra inteira, parte de uma palavra, um caractere ou até um símbolo de pontuação.",
+                    howItWorks: "Cada token é mapeado para um número único no vocabulário do modelo (geralmente 30.000-100.000 tokens). Palavras comuns como 'the' são um único token, enquanto palavras raras podem ser divididas em múltiplos tokens. Em português, acentos e caracteres especiais frequentemente resultam em mais tokens por palavra.",
+                    examples: [
+                        "'Olá mundo' pode ser tokenizado como ['Ol', 'á', ' mundo'] — 3 tokens",
+                        "A palavra 'inteligência' pode ser dividida em ['intel', 'ig', 'ência']",
+                        "Em inglês, 1 token ≈ 4 caracteres ou ≈ 0.75 palavras em média"
+                    ],
+                    keyPoints: [
+                        "São a menor unidade de processamento do LLM",
+                        "O custo das APIs é calculado por número de tokens",
+                        "Diferentes modelos usam diferentes esquemas de tokenização",
+                        "A eficiência de tokenização varia entre idiomas"
+                    ]
+                }
             },
             {
                 title: "Tokenization",
                 description: "Processo de conversão de texto em uma sequência de tokens.",
                 category: "foundations",
-                color: "bg-rose-100 border-rose-200 text-rose-900"
+                details: {
+                    fullDescription: "Tokenização é o processo de converter texto bruto em uma sequência de tokens que o modelo pode processar. É o primeiro passo em qualquer pipeline de LLM e afeta diretamente a eficiência e capacidade do modelo. Algoritmos como BPE (Byte Pair Encoding) e WordPiece são usados para criar vocabulários otimizados.",
+                    howItWorks: "O algoritmo BPE começa com caracteres individuais e iterativamente mescla os pares mais frequentes para formar tokens maiores. Isso cria um equilíbrio entre ter tokens pequenos (flexíveis mas ineficientes) e tokens grandes (eficientes mas rígidos). O resultado é um vocabulário que captura palavras comuns inteiras e divide palavras raras em sub-palavras reconhecíveis.",
+                    examples: [
+                        "BPE: 'unhappiness' → ['un', 'happiness'] ou ['un', 'happ', 'iness']",
+                        "O tokenizador do GPT-4 (cl100k_base) tem ~100.000 tokens no vocabulário",
+                        "Emojis e caracteres Unicode especiais geralmente consomem múltiplos tokens"
+                    ],
+                    keyPoints: [
+                        "BPE (Byte Pair Encoding) é o algoritmo mais usado",
+                        "O vocabulário é fixo após o treinamento",
+                        "Idiomas não-ingleses geralmente requerem mais tokens",
+                        "A qualidade da tokenização impacta o desempenho do modelo"
+                    ]
+                }
             },
             {
                 title: "Embeddings",
                 description: "Vetores numéricos que representam o significado dos tokens.",
                 category: "foundations",
-                color: "bg-rose-100 border-rose-200 text-rose-900"
+                details: {
+                    fullDescription: "Embeddings são representações vetoriais densas que capturam o significado semântico de tokens, palavras, frases ou documentos inteiros. Em vez de tratar palavras como símbolos discretos, embeddings as posicionam em um espaço matemático contínuo onde a proximidade reflete similaridade de significado.",
+                    howItWorks: "Cada token é convertido em um vetor de alta dimensão (ex: 768 ou 1536 dimensões). Durante o treinamento, o modelo ajusta esses vetores para que tokens com significados similares fiquem próximos no espaço vetorial. Operações matemáticas nos vetores podem revelar relações semânticas: por exemplo, vetor('rei') - vetor('homem') + vetor('mulher') ≈ vetor('rainha').",
+                    examples: [
+                        "'gato' e 'felino' terão embeddings muito próximos no espaço vetorial",
+                        "Embeddings de 1536 dimensões são usados pelo modelo text-embedding-ada-002",
+                        "Busca semântica usa similaridade de cosseno entre embeddings para encontrar textos relevantes"
+                    ],
+                    keyPoints: [
+                        "Capturam relações semânticas entre conceitos",
+                        "São a base para busca semântica e RAG",
+                        "Dimensionalidade típica: 384 a 4096 dimensões",
+                        "Podem ser pré-computados e armazenados em bancos vetoriais"
+                    ]
+                }
             },
             {
                 title: "Latent Space",
                 description: "Espaço matemático onde os embeddings são organizados por significado.",
                 category: "foundations",
-                color: "bg-rose-100 border-rose-200 text-rose-900"
+                details: {
+                    fullDescription: "O Espaço Latente é o espaço matemático multidimensional onde as representações internas do modelo existem. Neste espaço, conceitos abstratos são organizados de forma que relações semânticas se traduzem em relações geométricas. É 'latente' porque não é diretamente observável — existe apenas nas camadas internas do modelo.",
+                    howItWorks: "À medida que o texto passa pelas camadas do modelo, ele é transformado em representações cada vez mais abstratas neste espaço. As primeiras camadas capturam características sintáticas (gramática, estrutura), enquanto camadas mais profundas capturam semântica (significado, contexto, intenção). O espaço latente permite que o modelo generalize e faça analogias.",
+                    examples: [
+                        "Países e suas capitais formam clusters paralelos no espaço latente",
+                        "Palavras em diferentes idiomas com mesmo significado ficam próximas",
+                        "O modelo pode interpolar entre conceitos para gerar conteúdo criativo"
+                    ],
+                    keyPoints: [
+                        "Organiza conhecimento de forma contínua e navegável",
+                        "Permite generalização para dados nunca vistos",
+                        "A qualidade do espaço latente determina a capacidade do modelo",
+                        "Técnicas como t-SNE permitem visualizar partes deste espaço em 2D/3D"
+                    ]
+                }
             },
             {
                 title: "Parameters",
                 description: "Variáveis internas que armazenam os padrões aprendidos pelo modelo.",
                 category: "foundations",
-                color: "bg-rose-100 border-rose-200 text-rose-900"
+                details: {
+                    fullDescription: "Parâmetros são os valores numéricos (pesos e vieses) dentro da rede neural que são ajustados durante o treinamento para capturar padrões na linguagem. O número de parâmetros é frequentemente usado como medida do tamanho e capacidade do modelo — modelos maiores geralmente demonstram capacidades mais sofisticadas.",
+                    howItWorks: "Cada conexão entre neurônios na rede tem um peso associado. Durante o treinamento, esses pesos são ajustados através de backpropagation para minimizar o erro de previsão. Em um Transformer, os parâmetros incluem as matrizes de atenção (Query, Key, Value), as camadas feed-forward, e os embeddings de entrada/saída.",
+                    examples: [
+                        "GPT-3 tem 175 bilhões de parâmetros",
+                        "LLaMA 2 vem em versões de 7B, 13B e 70B parâmetros",
+                        "Claude e GPT-4 têm quantidade de parâmetros não divulgada publicamente"
+                    ],
+                    keyPoints: [
+                        "Mais parâmetros geralmente = mais capacidade, mas maior custo",
+                        "Modelos modernos variam de 1B a mais de 1T de parâmetros",
+                        "Quantização pode reduzir o tamanho sem grande perda de qualidade",
+                        "A lei de escala (scaling law) relaciona parâmetros, dados e desempenho"
+                    ]
+                }
             },
 
-            // Grupo 2: Treinamento (Amarelo/Bege)
+            // Treinamento
             {
                 title: "Pre-training",
                 description: "Treinamento em dados de texto massivos para aprender padrões de linguagem.",
                 category: "training",
-                color: "bg-amber-100 border-amber-200 text-amber-900"
+                details: {
+                    fullDescription: "Pré-treinamento é a fase inicial e mais custosa do desenvolvimento de um LLM, onde o modelo aprende os fundamentos da linguagem a partir de enormes quantidades de texto. Nesta fase, o modelo desenvolve uma compreensão ampla de gramática, fatos, raciocínio e até algum senso comum.",
+                    howItWorks: "O modelo é treinado com o objetivo de prever o próximo token em sequências de texto. Bilhões de textos da internet, livros, artigos e código são processados. O treinamento pode levar semanas ou meses em clusters de milhares de GPUs, custando milhões de dólares. O resultado é um modelo base que pode completar texto mas ainda não segue instruções.",
+                    examples: [
+                        "O treinamento do GPT-4 custou estimados $100 milhões em computação",
+                        "Common Crawl, Wikipedia e repositórios GitHub são fontes comuns de dados",
+                        "O LLaMA foi treinado em 1.4 trilhões de tokens"
+                    ],
+                    keyPoints: [
+                        "É a fase mais cara e demorada (semanas/meses)",
+                        "Usa aprendizado auto-supervisionado (next-token prediction)",
+                        "A qualidade e diversidade dos dados são cruciais",
+                        "Define as capacidades fundamentais do modelo"
+                    ]
+                }
             },
             {
                 title: "Base Model",
                 description: "Um modelo pré-treinado que prevê texto, mas não segue instruções.",
                 category: "training",
-                color: "bg-amber-100 border-amber-200 text-amber-900"
+                details: {
+                    fullDescription: "Um Modelo Base (ou Foundation Model) é o resultado direto do pré-treinamento. Ele aprendeu padrões estatísticos da linguagem e pode completar texto de forma coerente, mas não foi treinado para seguir instruções ou manter conversas. Ele simplesmente continua o texto que recebe da forma mais provável.",
+                    howItWorks: "Quando você fornece texto a um modelo base, ele gera a continuação mais estatisticamente provável. Se você escrever uma pergunta, em vez de respondê-la, ele pode gerar mais perguntas similares ou continuar como se fosse parte de um documento. É como um autocomplete muito sofisticado que entende contexto mas não entende intenção.",
+                    examples: [
+                        "Input: 'A capital do Brasil é' → Output provável: 'Brasília, cidade planejada...'",
+                        "Input: 'Qual é a capital do Brasil?' → Pode gerar: 'Qual é a capital da Argentina?' (completando um quiz)",
+                        "GPT-3 base, LLaMA base e Mistral base são exemplos de modelos base"
+                    ],
+                    keyPoints: [
+                        "Excelente em completar texto, mas imprevisível para conversas",
+                        "Serve como fundação para fine-tuning e alinhamento",
+                        "Ainda é útil para tarefas como few-shot learning",
+                        "Pesquisadores frequentemente preferem modelos base para experimentação"
+                    ]
+                }
             },
             {
                 title: "Instruct Model",
                 description: "Um modelo base treinado adicionalmente para seguir instruções e responder de forma útil.",
                 category: "training",
-                color: "bg-amber-100 border-amber-200 text-amber-900"
+                details: {
+                    fullDescription: "Um Modelo Instruct é um modelo base que passou por treinamento adicional para entender e seguir instruções em linguagem natural. Este treinamento transforma o modelo de um simples completador de texto em um assistente capaz de responder perguntas, seguir comandos e manter conversas produtivas.",
+                    howItWorks: "O processo envolve fine-tuning supervisionado com pares de instrução-resposta criados por humanos, seguido de RLHF (Reinforcement Learning from Human Feedback). Humanos escrevem exemplos de como o modelo deveria responder a diferentes tipos de instruções, e o modelo aprende a replicar esse padrão de comportamento.",
+                    examples: [
+                        "GPT-4-turbo, Claude 3 Opus e Gemini Pro são modelos instruct",
+                        "'Resuma este texto em 3 pontos' → o modelo entende e executa a tarefa",
+                        "ChatGPT é essencialmente o GPT base transformado em modelo instruct via RLHF"
+                    ],
+                    keyPoints: [
+                        "Segue instruções de forma confiável e previsível",
+                        "Mantém conversas coerentes e contextuais",
+                        "Pode recusar pedidos inapropriados (safety training)",
+                        "É o tipo de modelo usado em produtos como ChatGPT e Claude"
+                    ]
+                }
             },
             {
                 title: "Fine-Tuning",
                 description: "Treinamento adicional em um conjunto de dados menor para moldar o comportamento do modelo.",
                 category: "training",
-                color: "bg-amber-100 border-amber-200 text-amber-900"
+                details: {
+                    fullDescription: "Fine-tuning é o processo de continuar o treinamento de um modelo pré-treinado usando um conjunto de dados menor e especializado. Isso permite adaptar o modelo para tarefas específicas, domínios de conhecimento ou estilos de resposta sem precisar treinar um modelo do zero.",
+                    howItWorks: "O modelo base tem seus pesos levemente ajustados usando dados específicos do domínio. Técnicas como LoRA (Low-Rank Adaptation) permitem fazer fine-tuning eficiente modificando apenas uma pequena fração dos parâmetros. O processo geralmente requer centenas a milhares de exemplos de alta qualidade e pode ser feito em horas com uma única GPU.",
+                    examples: [
+                        "Fine-tuning para atendimento ao cliente com histórico de conversas reais",
+                        "Adaptar um modelo para gerar código em uma linguagem específica",
+                        "LoRA permite fine-tuning de modelos de 7B parâmetros em uma GPU de 16GB"
+                    ],
+                    keyPoints: [
+                        "Muito mais barato e rápido que pré-treinamento",
+                        "LoRA e QLoRA tornaram fine-tuning acessível",
+                        "Risco de catastrophic forgetting (esquecer conhecimento anterior)",
+                        "A qualidade dos dados é mais importante que a quantidade"
+                    ]
+                }
             },
             {
                 title: "Alignment",
                 description: "Garantir que o comportamento do modelo seja útil, honesto e inofensivo.",
                 category: "training",
-                color: "bg-amber-100 border-amber-200 text-amber-900"
+                details: {
+                    fullDescription: "Alinhamento é o processo de garantir que um modelo de IA se comporte de acordo com valores e intenções humanas. Isso inclui ser útil (helpful), honesto (honest) e inofensivo (harmless) — os chamados critérios HHH. É considerado um dos maiores desafios da IA moderna.",
+                    howItWorks: "O alinhamento combina várias técnicas: fine-tuning supervisionado com exemplos de comportamento desejado, RLHF para otimizar preferências humanas, Constitutional AI (CAI) onde o modelo aprende a seguir princípios éticos, e red-teaming para identificar falhas. O objetivo é criar modelos que entendam não apenas O QUE fazer, mas também O QUE NÃO fazer.",
+                    examples: [
+                        "Um modelo alinhado recusa gerar instruções para atividades ilegais",
+                        "Constitutional AI da Anthropic usa princípios escritos para guiar o comportamento",
+                        "O modelo admite incerteza em vez de fabricar informações (honestidade)"
+                    ],
+                    keyPoints: [
+                        "Baseado nos critérios HHH: Helpful, Honest, Harmless",
+                        "É um problema em aberto na pesquisa de IA",
+                        "Inclui safety training contra usos maliciosos",
+                        "O desalinhamento é um risco existencial segundo alguns pesquisadores"
+                    ]
+                }
             },
             {
                 title: "RLHF",
                 description: "Uso de respostas classificadas por humanos para guiar o comportamento do modelo.",
                 category: "training",
-                color: "bg-amber-100 border-amber-200 text-amber-900"
+                details: {
+                    fullDescription: "RLHF (Reinforcement Learning from Human Feedback) é uma técnica de treinamento onde avaliadores humanos classificam diferentes respostas do modelo, e essas classificações são usadas para treinar um modelo de recompensa que guia o aprendizado por reforço. Foi a técnica chave que tornou o ChatGPT tão eficaz.",
+                    howItWorks: "O processo tem 3 etapas: (1) Fine-tuning supervisionado com exemplos humanos, (2) Treinamento de um modelo de recompensa — humanos comparam pares de respostas e escolhem a melhor, criando um dataset de preferências, (3) Otimização por PPO (Proximal Policy Optimization) usando o modelo de recompensa para guiar o LLM a gerar respostas preferidas pelos humanos.",
+                    examples: [
+                        "Avaliadores comparam duas respostas e escolhem a mais útil e segura",
+                        "O ChatGPT original usou RLHF extensivamente para melhorar o GPT-3.5",
+                        "DPO (Direct Preference Optimization) é uma alternativa mais simples ao RLHF"
+                    ],
+                    keyPoints: [
+                        "Responsável pela revolução de usabilidade do ChatGPT",
+                        "Requer trabalho humano significativo para avaliação",
+                        "PPO é o algoritmo de RL mais usado neste contexto",
+                        "DPO e RLAIF são alternativas mais recentes e eficientes"
+                    ]
+                }
             },
 
-            // Grupo 3: Prompts e Contexto (Azul/Cinza)
+            // Prompts
             {
                 title: "Prompt",
                 description: "Entrada completa enviada ao modelo, incluindo instruções e contexto.",
                 category: "prompting",
-                color: "bg-sky-100 border-sky-200 text-sky-900"
+                details: {
+                    fullDescription: "Um prompt é todo o texto de entrada enviado ao modelo, incluindo instruções, contexto, exemplos e a pergunta ou tarefa em si. A qualidade do prompt tem impacto direto na qualidade da resposta — a arte e ciência de criar bons prompts é chamada de 'Prompt Engineering'.",
+                    howItWorks: "O modelo processa o prompt inteiro como contexto para gerar sua resposta. Cada token do prompt influencia a distribuição de probabilidade dos tokens de saída. Prompts bem estruturados guiam o modelo para o formato, estilo e conteúdo desejados. A ordem das informações, a clareza das instruções e a especificidade dos requisitos são fatores cruciais.",
+                    examples: [
+                        "Prompt simples: 'O que é machine learning?'",
+                        "Prompt estruturado: 'Você é um professor. Explique machine learning para um iniciante em 3 parágrafos.'",
+                        "Prompt com contexto: 'Dado o artigo abaixo, extraia os 5 pontos principais: [artigo]'"
+                    ],
+                    keyPoints: [
+                        "Prompt Engineering é uma habilidade valiosa e em crescimento",
+                        "Prompts claros e específicos geram melhores resultados",
+                        "O formato do prompt afeta formato da resposta",
+                        "Técnicas como Chain-of-Thought melhoram raciocínio via prompt"
+                    ]
+                }
             },
             {
                 title: "System Prompt",
                 description: "Instruções de alto nível que definem o papel e os limites do modelo.",
                 category: "prompting",
-                color: "bg-sky-100 border-sky-200 text-sky-900"
+                details: {
+                    fullDescription: "O System Prompt é uma instrução especial que define o comportamento, personalidade, limitações e contexto do modelo antes da interação com o usuário. Ele funciona como uma 'configuração' do assistente, estabelecendo regras que devem ser seguidas em toda a conversa.",
+                    howItWorks: "O system prompt é processado como o primeiro bloco de contexto na conversa. Ele tem prioridade especial na maioria das implementações e influencia todas as respostas subsequentes. APIs como a da OpenAI e Anthropic têm um campo dedicado para system prompts, separado das mensagens do usuário.",
+                    examples: [
+                        "'Você é um assistente especializado em direito brasileiro. Sempre cite as leis relevantes.'",
+                        "'Responda apenas em JSON. Nunca inclua explicações em texto.'",
+                        "'Você é um tutor paciente. Use linguagem simples e dê exemplos práticos.'"
+                    ],
+                    keyPoints: [
+                        "Define persona, tom e limites do assistente",
+                        "Separado do user prompt na maioria das APIs",
+                        "Pode incluir instruções de segurança e restrições",
+                        "Não é 100% inviolável — jailbreaks podem contorná-lo"
+                    ]
+                }
             },
             {
                 title: "User Prompt",
                 description: "Pergunta ou instrução específica fornecida pelo usuário.",
                 category: "prompting",
-                color: "bg-sky-100 border-sky-200 text-sky-900"
+                details: {
+                    fullDescription: "O User Prompt é a mensagem direta do usuário ao modelo — a pergunta, comando ou tarefa que o usuário deseja que o modelo execute. É a parte mais dinâmica da interação e varia a cada turno da conversa.",
+                    howItWorks: "O user prompt é combinado com o system prompt e o histórico da conversa para formar o contexto completo. O modelo gera sua resposta considerando todas essas informações. Em aplicações multi-turno, cada novo user prompt é adicionado ao histórico, permitindo conversas contextuais.",
+                    examples: [
+                        "'Explique a teoria da relatividade em termos simples'",
+                        "'Corrija os erros neste código Python: [código]'",
+                        "'Continue a história que começamos no turno anterior'"
+                    ],
+                    keyPoints: [
+                        "É a interface direta entre humano e modelo",
+                        "Combinado com system prompt para contexto completo",
+                        "Histórico de conversas anteriores influencia a resposta",
+                        "Clareza e especificidade melhoram a qualidade da resposta"
+                    ]
+                }
             },
             {
                 title: "Context Window",
                 description: "Número máximo de tokens que o modelo pode processar de uma vez.",
                 category: "prompting",
-                color: "bg-sky-100 border-sky-200 text-sky-900"
+                details: {
+                    fullDescription: "A Context Window (Janela de Contexto) é o número máximo de tokens que um modelo pode considerar simultaneamente, incluindo tanto a entrada (prompt) quanto a saída (resposta). É uma limitação fundamental que determina quanta informação o modelo pode processar de uma vez.",
+                    howItWorks: "O mecanismo de atenção do Transformer calcula relações entre todos os pares de tokens na janela, resultando em complexidade quadrática O(n²). Isso limita naturalmente o tamanho da janela. Técnicas como atenção esparsa, RoPE e ALiBi permitem expandir a janela sem custo quadrático completo.",
+                    examples: [
+                        "GPT-3.5: 4K-16K tokens | GPT-4: 8K-128K tokens",
+                        "Claude 3: até 200K tokens (~150.000 palavras ou ~500 páginas)",
+                        "Gemini 1.5 Pro: até 1M tokens (equivalente a vários livros)"
+                    ],
+                    keyPoints: [
+                        "Inclui tanto input quanto output no limite total",
+                        "Janelas maiores = mais contexto mas maior custo e latência",
+                        "Técnicas como RAG ajudam a contornar limitações de contexto",
+                        "A capacidade de usar efetivamente toda a janela varia entre modelos"
+                    ]
+                }
             },
             {
                 title: "Zero-Shot Learning",
                 description: "Realização de uma tarefa sem exemplos no prompt.",
                 category: "prompting",
-                color: "bg-sky-100 border-sky-200 text-sky-900"
+                details: {
+                    fullDescription: "Zero-Shot Learning é a capacidade do modelo de realizar uma tarefa apenas com uma instrução, sem receber nenhum exemplo de como a tarefa deve ser executada. Isso é possível porque o modelo internalizou padrões suficientes durante o pré-treinamento para generalizar para novas tarefas.",
+                    howItWorks: "O modelo usa seu conhecimento internalizado durante o pré-treinamento para entender a instrução e gerar uma resposta apropriada. A capacidade zero-shot melhora significativamente com o tamanho do modelo — modelos maiores demonstram capacidades zero-shot que modelos menores não possuem (capacidades emergentes).",
+                    examples: [
+                        "'Classifique este texto como positivo ou negativo: O filme foi incrível!' → 'Positivo'",
+                        "'Traduza para inglês: Bom dia' → 'Good morning'",
+                        "'Resuma este artigo em 3 pontos:' — sem exemplos de resumos anteriores"
+                    ],
+                    keyPoints: [
+                        "Demonstra a generalização do conhecimento do modelo",
+                        "Funciona melhor em modelos maiores e mais capazes",
+                        "Ideal para tarefas comuns que não requerem formato específico",
+                        "Pode ser insuficiente para tarefas muito especializadas ou com formato rígido"
+                    ]
+                }
             },
             {
                 title: "Few-Shot Learning",
                 description: "Inclusão de exemplos no prompt para guiar o formato ou comportamento da saída.",
                 category: "prompting",
-                color: "bg-sky-100 border-sky-200 text-sky-900"
+                details: {
+                    fullDescription: "Few-Shot Learning é a técnica de incluir alguns exemplos (geralmente 2-5) no prompt para demonstrar ao modelo exatamente como a tarefa deve ser executada. Os exemplos servem como 'template' que o modelo segue para gerar respostas no formato e estilo desejados.",
+                    howItWorks: "Os exemplos criam um padrão in-context que o modelo reconhece e replica. Não há atualização de pesos — o modelo simplesmente usa os exemplos como contexto para inferência. A eficácia depende da qualidade e representatividade dos exemplos escolhidos. Exemplos diversos e bem escolhidos produzem melhores resultados.",
+                    examples: [
+                        "Sentimento: 'Amo este produto!' → Positivo | 'Péssimo serviço' → Negativo | 'O atendimento foi rápido' → ?",
+                        "Fornecendo 3 exemplos de formatação JSON antes de pedir a conversão de dados",
+                        "Mostrando exemplos de tom formal antes de pedir a redação de um e-mail corporativo"
+                    ],
+                    keyPoints: [
+                        "2-5 exemplos geralmente são suficientes",
+                        "Exemplos diversos melhoram a generalização",
+                        "Consome tokens da context window (trade-off)",
+                        "Mais eficaz que zero-shot para tarefas com formato específico"
+                    ]
+                }
             },
 
-            // Grupo 4: Inferência e Parâmetros (Roxo/Lilás)
+            // Inferência
             {
                 title: "Chain of Thought",
                 description: "Solicitar ao modelo que mostre o raciocínio passo a passo.",
                 category: "inference",
-                color: "bg-purple-100 border-purple-200 text-purple-900"
+                details: {
+                    fullDescription: "Chain of Thought (CoT) é uma técnica de prompting que instrui o modelo a 'pensar em voz alta', decompondo problemas complexos em passos intermediários antes de chegar à resposta final. Isso melhora dramaticamente o desempenho em tarefas de raciocínio, matemática e lógica.",
+                    howItWorks: "Ao gerar tokens intermediários de raciocínio, o modelo efetivamente 'usa' esses tokens como memória de trabalho adicional. Cada passo intermediário condiciona os passos seguintes, permitindo raciocínio mais preciso. Variações incluem CoT zero-shot ('Pense passo a passo') e CoT few-shot (com exemplos de raciocínio).",
+                    examples: [
+                        "'Pense passo a passo: Se João tem 3 maçãs e Maria tem o dobro, quantas elas têm juntos?'",
+                        "Modelo raciocina: '1) João tem 3 maçãs. 2) Maria tem 3×2=6 maçãs. 3) Total: 3+6=9'",
+                        "Tree of Thought expande CoT com múltiplos caminhos de raciocínio paralelos"
+                    ],
+                    keyPoints: [
+                        "Melhora significativamente o desempenho em tarefas de raciocínio",
+                        "Basta adicionar 'Pense passo a passo' ao prompt (zero-shot CoT)",
+                        "Consome mais tokens mas produz respostas mais confiáveis",
+                        "Base para modelos de raciocínio como o1 e DeepSeek-R1"
+                    ]
+                }
             },
             {
                 title: "Inference",
                 description: "Processo de geração de tokens de saída a partir de um modelo treinado.",
                 category: "inference",
-                color: "bg-purple-100 border-purple-200 text-purple-900"
+                details: {
+                    fullDescription: "Inferência é o processo de usar um modelo já treinado para gerar respostas. Diferente do treinamento (que ajusta pesos), a inferência mantém os pesos fixos e apenas calcula os tokens de saída. É o que acontece cada vez que você envia uma mensagem ao ChatGPT ou Claude.",
+                    howItWorks: "O prompt é tokenizado e passado pelas camadas do modelo. Na última camada, o modelo gera uma distribuição de probabilidade sobre todo o vocabulário para o próximo token. Um token é selecionado (usando temperatura e outros parâmetros), adicionado à sequência, e o processo se repete autorregressivamente até gerar um token de parada ou atingir o limite.",
+                    examples: [
+                        "Cada mensagem enviada ao ChatGPT inicia um processo de inferência",
+                        "Inferência em batch: processar múltiplas requisições simultaneamente para eficiência",
+                        "Speculative decoding usa um modelo menor para acelerar a inferência do modelo grande"
+                    ],
+                    keyPoints: [
+                        "Processo autorregressivo: um token por vez, sequencialmente",
+                        "Muito mais barato que treinamento, mas ainda significativo em escala",
+                        "KV-cache otimiza re-computações durante a geração",
+                        "Técnicas como quantização reduzem custo de inferência"
+                    ]
+                }
             },
             {
                 title: "Latency",
                 description: "Tempo entre o envio de um prompt e o recebimento da saída.",
                 category: "inference",
-                color: "bg-purple-100 border-purple-200 text-purple-900"
+                details: {
+                    fullDescription: "Latência é o tempo de resposta do modelo, medido desde o envio do prompt até o recebimento da resposta completa (ou do primeiro token, no caso de streaming). É um fator crítico para a experiência do usuário e para aplicações em tempo real.",
+                    howItWorks: "A latência total inclui: tempo de rede, tokenização do input, processamento do prompt (prefill), e geração autorregressiva de cada token (decode). O prefill processa todos os tokens de entrada em paralelo e é proporcional ao tamanho do prompt. O decode é sequencial e proporcional ao tamanho da resposta. Streaming mostra tokens conforme são gerados, reduzindo a latência percebida.",
+                    examples: [
+                        "Time to First Token (TTFT): tipicamente 0.5-2 segundos para modelos grandes",
+                        "Streaming reduz a latência percebida mostrando tokens conforme são gerados",
+                        "Modelos menores (7B) podem ter TTFT de menos de 100ms em hardware adequado"
+                    ],
+                    keyPoints: [
+                        "TTFT (Time to First Token) é a métrica mais importante para UX",
+                        "Prompts maiores aumentam a latência de prefill",
+                        "Modelos menores são significativamente mais rápidos",
+                        "Edge deployment e quantização ajudam a reduzir latência"
+                    ]
+                }
             },
             {
                 title: "Temperature",
                 description: "Um parâmetro que controla a aleatoriedade na seleção de tokens.",
                 category: "inference",
-                color: "bg-purple-100 border-purple-200 text-purple-900"
+                details: {
+                    fullDescription: "Temperature é um hiperparâmetro que controla a aleatoriedade/criatividade na geração de texto. Valores baixos (0-0.3) tornam o modelo mais determinístico e focado, enquanto valores altos (0.7-1.5) tornam as respostas mais diversas e criativas, mas potencialmente menos coerentes.",
+                    howItWorks: "A temperature modifica a distribuição de probabilidade dos tokens antes da amostragem. Matematicamente, as logits (scores brutos) são divididas pela temperature antes do softmax. Temperature 0 seleciona sempre o token mais provável (greedy). Temperature 1 mantém a distribuição original. Temperature > 1 'achata' a distribuição, dando mais chance a tokens menos prováveis.",
+                    examples: [
+                        "Temperature 0: 'A capital do Brasil é Brasília.' (sempre igual)",
+                        "Temperature 0.7: respostas variadas mas coerentes — ideal para escrita criativa",
+                        "Temperature 1.5: pode gerar texto surpreendente mas por vezes incoerente"
+                    ],
+                    keyPoints: [
+                        "0 = determinístico, 1 = distribuição original, >1 = mais aleatório",
+                        "Use baixa (0-0.3) para tarefas factuais e código",
+                        "Use média (0.5-0.8) para escrita criativa equilibrada",
+                        "Top-p (nucleus sampling) é outro parâmetro complementar"
+                    ]
+                }
             },
             {
                 title: "Hallucination",
                 description: "Geração confiante de informações incorretas ou fabricadas.",
                 category: "inference",
-                color: "bg-purple-100 border-purple-200 text-purple-900"
+                details: {
+                    fullDescription: "Alucinação ocorre quando o modelo gera informações que parecem corretas e são apresentadas com confiança, mas são factualmente incorretas, inventadas ou não fundamentadas. É um dos maiores desafios dos LLMs atuais, pois o modelo não distingue entre 'lembrar' fatos reais e 'inventar' fatos plausíveis.",
+                    howItWorks: "LLMs são treinados para gerar texto estatisticamente plausível, não necessariamente verdadeiro. O modelo aprende padrões de como fatos são expressos, mas não tem um 'banco de dados' verificável. Quando o modelo não 'sabe' algo, ele pode gerar uma resposta que segue o padrão estatístico correto mas contém informações fabricadas. Isso ocorre porque o modelo otimiza plausibilidade, não veracidade.",
+                    examples: [
+                        "Citar artigos acadêmicos com títulos, autores e DOIs completamente inventados",
+                        "Afirmar com confiança que um evento histórico ocorreu em uma data incorreta",
+                        "Inventar funcionalidades inexistentes de bibliotecas de programação"
+                    ],
+                    keyPoints: [
+                        "O modelo não sabe que está 'inventando' — gera texto plausível",
+                        "Técnicas como RAG e Grounding ajudam a mitigar alucinações",
+                        "Verificação humana continua sendo essencial para conteúdo crítico",
+                        "Modelos mais recentes alucinam menos, mas o problema persiste"
+                    ]
+                }
             },
             {
                 title: "Grounding",
                 description: "Restrição das saídas a informações fornecidas ou verificáveis.",
                 category: "inference",
-                color: "bg-purple-100 border-purple-200 text-purple-900"
+                details: {
+                    fullDescription: "Grounding é o processo de ancorar as respostas do modelo em fontes de informação verificáveis e confiáveis, em vez de depender apenas do conhecimento internalizado durante o treinamento. É a principal estratégia para combater alucinações e garantir precisão factual.",
+                    howItWorks: "O modelo recebe documentos, dados ou contexto verificável junto com a instrução, e é orientado a basear suas respostas exclusivamente nessas fontes. Técnicas incluem RAG (buscar informações relevantes antes de responder), citação de fontes, e instruções explícitas como 'responda apenas com base no contexto fornecido'.",
+                    examples: [
+                        "'Com base APENAS no documento abaixo, responda:' — grounding explícito",
+                        "RAG busca documentos relevantes e os inclui no prompt como contexto",
+                        "Google Search Grounding: modelo consulta a web antes de responder"
+                    ],
+                    keyPoints: [
+                        "Principal defesa contra alucinações",
+                        "RAG é a técnica de grounding mais popular",
+                        "Pode incluir citações e referências para verificação",
+                        "Trade-off: limita criatividade mas aumenta confiabilidade"
+                    ]
+                }
             },
 
-            // Grupo 5: Avançado e Aplicação (Verde)
+            // Aplicação
             {
                 title: "RAG",
                 description: "Recuperação de dados externos e adição ao prompt antes da geração.",
                 category: "application",
-                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+                details: {
+                    fullDescription: "RAG (Retrieval-Augmented Generation) combina busca de informação com geração de texto. Em vez de depender apenas do conhecimento do modelo, RAG primeiro busca documentos relevantes em uma base de dados e os inclui no prompt, permitindo respostas atualizadas, precisas e citáveis.",
+                    howItWorks: "O processo tem 3 etapas: (1) Indexação: documentos são convertidos em embeddings e armazenados em um banco vetorial. (2) Recuperação: a pergunta do usuário é convertida em embedding e os documentos mais similares são recuperados via busca por similaridade. (3) Geração: os documentos recuperados são incluídos no prompt junto com a pergunta, e o LLM gera uma resposta baseada nesse contexto.",
+                    examples: [
+                        "Chatbot corporativo que busca em manuais internos antes de responder",
+                        "Assistente jurídico que consulta legislação atualizada via RAG",
+                        "Ferramentas como Perplexity AI usam RAG com busca na web em tempo real"
+                    ],
+                    keyPoints: [
+                        "Resolve o problema de conhecimento desatualizado do modelo",
+                        "Reduz alucinações ao fornecer fontes verificáveis",
+                        "Bancos vetoriais como Pinecone, Weaviate e ChromaDB são usados",
+                        "A qualidade da recuperação determina a qualidade da resposta"
+                    ]
+                }
             },
             {
                 title: "Workflow",
                 description: "Uma sequência fixa e predefinida onde o LLM segue passos estabelecidos.",
                 category: "application",
-                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+                details: {
+                    fullDescription: "Um Workflow de LLM é uma sequência predefinida e determinística de etapas onde o modelo é usado como componente em pontos específicos. Diferente de um agente autônomo, o fluxo de execução é fixo e controlado pelo código, não pelo modelo. Cada etapa tem entrada e saída definidas.",
+                    howItWorks: "O desenvolvedor define uma pipeline com etapas sequenciais ou paralelas. Em cada etapa, o LLM pode ser chamado para uma tarefa específica (classificar, extrair, gerar, etc). A lógica de controle (condicionais, loops, roteamento) é implementada em código, não delegada ao modelo. Frameworks como LangChain e LlamaIndex facilitam a criação de workflows.",
+                    examples: [
+                        "Pipeline de análise de e-mail: classificar → extrair entidades → gerar resposta → revisar",
+                        "Geração de relatório: coletar dados → analisar → gerar texto → formatar",
+                        "Processamento de documento: OCR → chunking → embedding → indexação"
+                    ],
+                    keyPoints: [
+                        "Fluxo previsível e debugável (vs. agentes autônomos)",
+                        "Cada etapa pode usar um prompt diferente otimizado",
+                        "Mais fácil de testar e monitorar que agentes",
+                        "Ideal quando a sequência de passos é conhecida antecipadamente"
+                    ]
+                }
             },
             {
                 title: "Agent",
                 description: "Um sistema onde o LLM planeja ações, depois escolhe dinamicamente passos e ferramentas.",
                 category: "application",
-                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+                details: {
+                    fullDescription: "Um Agente de IA é um sistema onde o LLM atua como o 'cérebro' que autonomamente planeja, toma decisões e executa ações usando ferramentas externas. Diferente de workflows fixos, agentes determinam dinamicamente quais passos tomar com base no contexto e nos resultados intermediários.",
+                    howItWorks: "O agente segue um loop: (1) Observar o estado atual e o objetivo, (2) Raciocinar sobre o próximo passo (usando CoT), (3) Selecionar e executar uma ferramenta (busca, código, API, etc.), (4) Observar o resultado, (5) Decidir se o objetivo foi atingido ou se mais ações são necessárias. Frameworks como AutoGPT, CrewAI e o próprio Claude com tool use implementam este padrão.",
+                    examples: [
+                        "Claude Code: agente que lê código, planeja mudanças e executa comandos",
+                        "Agente de pesquisa que busca na web, lê artigos e sintetiza informações",
+                        "Agente de atendimento que consulta banco de dados, processa pedidos e escala para humanos"
+                    ],
+                    keyPoints: [
+                        "Autonomia: decide quais ações tomar dinamicamente",
+                        "Usa ferramentas (tool use) para interagir com o mundo",
+                        "Mais flexível que workflows, mas menos previsível",
+                        "Requer guardrails robustas para evitar ações indesejadas"
+                    ]
+                }
             },
             {
                 title: "Multimodality",
                 description: "Capacidade de processar múltiplos tipos de entrada, como texto e imagens.",
                 category: "application",
-                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+                details: {
+                    fullDescription: "Multimodalidade é a capacidade de um modelo processar e/ou gerar diferentes tipos de dados — texto, imagens, áudio, vídeo e código. Modelos multimodais podem entender o contexto através de múltiplas modalidades simultaneamente, aproximando-se da percepção humana.",
+                    howItWorks: "Modelos multimodais usam encoders especializados para cada tipo de entrada (ex: Vision Transformer para imagens) que convertem dados de diferentes modalidades para o mesmo espaço de embedding. O modelo pode então raciocinar sobre todas as modalidades simultaneamente. Alguns modelos são multimodais na entrada (entendem imagens) mas unimodais na saída (geram apenas texto).",
+                    examples: [
+                        "GPT-4V e Claude 3 podem analisar imagens e responder perguntas sobre elas",
+                        "Gemini pode processar texto, imagens, áudio e vídeo simultaneamente",
+                        "DALL-E e Midjourney geram imagens a partir de descrições textuais"
+                    ],
+                    keyPoints: [
+                        "Texto + imagem é a combinação multimodal mais comum",
+                        "Modelos recentes estão adicionando áudio e vídeo",
+                        "Permite aplicações como análise de documentos, OCR inteligente e acessibilidade",
+                        "A qualidade varia significativamente entre modalidades e modelos"
+                    ]
+                }
             },
             {
                 title: "Benchmarks",
                 description: "Testes padronizados usados para comparar as capacidades do modelo.",
                 category: "application",
-                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+                details: {
+                    fullDescription: "Benchmarks são conjuntos de testes padronizados usados para medir e comparar o desempenho de diferentes modelos de IA em tarefas específicas. Eles incluem questões de raciocínio, matemática, programação, conhecimento geral e mais, fornecendo métricas objetivas de comparação.",
+                    howItWorks: "Cada benchmark consiste em um conjunto de problemas com respostas verificáveis. Os modelos são avaliados sem acesso às respostas, e sua pontuação é calculada com base na precisão. Benchmarks são cuidadosamente projetados para testar capacidades específicas e minimizar a possibilidade de memorização (data contamination).",
+                    examples: [
+                        "MMLU: 57 disciplinas acadêmicas — testa conhecimento geral amplo",
+                        "HumanEval: problemas de programação — testa capacidade de codificação",
+                        "GSM8K: problemas matemáticos de nível escolar — testa raciocínio quantitativo"
+                    ],
+                    keyPoints: [
+                        "Essenciais para comparação objetiva entre modelos",
+                        "Data contamination é um risco (modelo memoriza perguntas do benchmark)",
+                        "Nenhum benchmark captura completamente a utilidade real de um modelo",
+                        "Leaderboards como LMSYS Chatbot Arena usam avaliação humana"
+                    ]
+                }
             },
             {
                 title: "Guardrails",
                 description: "Sistemas que bloqueiam entradas e saídas inseguras ou inapropriadas.",
                 category: "application",
-                color: "bg-emerald-100 border-emerald-200 text-emerald-900"
+                details: {
+                    fullDescription: "Guardrails são sistemas de segurança que filtram, validam e controlam as entradas e saídas de LLMs para prevenir usos indevidos, conteúdo prejudicial e comportamentos indesejados. Funcionam como camadas de proteção ao redor do modelo, garantindo que ele opere dentro de limites aceitáveis.",
+                    howItWorks: "Guardrails operam em múltiplas camadas: (1) Filtros de entrada — detectam e bloqueiam prompts maliciosos, jailbreaks e conteúdo proibido antes de chegar ao modelo. (2) Regras de saída — verificam a resposta do modelo contra políticas definidas (PII, toxicidade, temas proibidos). (3) Validação estrutural — garantem que a saída esteja no formato correto (JSON, comprimento, etc.).",
+                    examples: [
+                        "Bloquear geração de código malicioso ou instruções perigosas",
+                        "Detectar e redatar informações pessoais (PII) nas respostas",
+                        "NeMo Guardrails da NVIDIA permite definir regras conversacionais declarativas"
+                    ],
+                    keyPoints: [
+                        "Essenciais para deploy em produção de aplicações com LLM",
+                        "Incluem proteção contra prompt injection e jailbreaks",
+                        "Frameworks como Guardrails AI e NeMo facilitam a implementação",
+                        "Devem ser testadas continuamente com red-teaming"
+                    ]
+                }
             }
         ];
 
-        const FlipCard = ({ item }) => {
-            const [isFlipped, setIsFlipped] = useState(false);
+        // Modal Component
+        const DetailModal = ({ concept, onClose }) => {
+            const cat = categoryConfig[concept.category];
+            const details = concept.details;
+
+            useEffect(() => {
+                const handleEsc = (e) => { if (e.key === 'Escape') onClose(); };
+                document.addEventListener('keydown', handleEsc);
+                document.body.style.overflow = 'hidden';
+                return () => {
+                    document.removeEventListener('keydown', handleEsc);
+                    document.body.style.overflow = '';
+                };
+            }, [onClose]);
 
             return (
-                <div className="group h-48 w-full cursor-pointer [perspective:1000px]" onClick={() => setIsFlipped(!isFlipped)}>
-                    <div className={`relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] shadow-md hover:shadow-xl rounded-2xl ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
-                        {/* Front Side */}
-                        <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 text-center rounded-2xl border-2 [backface-visibility:hidden] ${item.color}`}>
-                            <div className="mb-2 opacity-50">
-                                <Sparkles size={20} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay"
+                    onClick={onClose}>
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+                    {/* Modal */}
+                    <div className="relative w-full max-w-2xl max-h-[90vh] rounded-2xl border overflow-hidden modal-content"
+                        style={{ borderColor: cat.neonColor + '40', boxShadow: `0 0 40px ${cat.neonColor}20, 0 0 80px ${cat.neonColor}10` }}
+                        onClick={(e) => e.stopPropagation()}>
+
+                        {/* Header */}
+                        <div className="bg-darkSurface px-6 py-5 border-b flex items-center justify-between"
+                            style={{ borderColor: cat.neonColor + '30' }}>
+                            <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.neonColor, boxShadow: `0 0 10px ${cat.neonColor}` }}></div>
+                                <h2 className="text-2xl font-bold" style={{ color: cat.neonColor, textShadow: `0 0 20px ${cat.neonColor}60` }}>
+                                    {concept.title}
+                                </h2>
+                                <span className="text-xs px-2 py-1 rounded-full bg-white/5 text-gray-400 border border-white/10">
+                                    {cat.label}
+                                </span>
                             </div>
-                            <h3 className="text-xl font-bold tracking-tight">{item.title}</h3>
-                            <p className="mt-4 text-xs font-semibold uppercase opacity-60">Toque para ver a definição</p>
+                            <button onClick={onClose}
+                                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="bg-darkCard overflow-y-auto modal-scroll" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+                            <div className="p-6 space-y-6">
+
+                                {/* Full Description */}
+                                <div>
+                                    <p className="text-gray-300 leading-relaxed text-[15px]">{details.fullDescription}</p>
+                                </div>
+
+                                {/* How It Works */}
+                                <div className="rounded-xl p-5 border bg-white/[0.02]" style={{ borderColor: cat.neonColor + '20' }}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Lightbulb size={18} style={{ color: cat.neonColor }} />
+                                        <h3 className="font-semibold text-white">Como Funciona</h3>
+                                    </div>
+                                    <p className="text-gray-400 leading-relaxed text-sm">{details.howItWorks}</p>
+                                </div>
+
+                                {/* Examples */}
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Code size={18} style={{ color: cat.neonColor }} />
+                                        <h3 className="font-semibold text-white">Exemplos</h3>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {details.examples.map((ex, i) => (
+                                            <div key={i} className="flex items-start gap-3 text-sm">
+                                                <ArrowRight size={14} className="mt-1 flex-shrink-0" style={{ color: cat.neonColor }} />
+                                                <span className="text-gray-400">{ex}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Key Points */}
+                                <div className="rounded-xl p-5 border bg-white/[0.02]" style={{ borderColor: cat.neonColor + '20' }}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <BookOpen size={18} style={{ color: cat.neonColor }} />
+                                        <h3 className="font-semibold text-white">Pontos-Chave</h3>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        {details.keyPoints.map((point, i) => (
+                                            <div key={i} className="flex items-start gap-2 text-sm">
+                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.neonColor }}></span>
+                                                <span className="text-gray-400">{point}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const FlipCard = ({ item, onShowDetails }) => {
+            const [isFlipped, setIsFlipped] = useState(false);
+            const cat = categoryConfig[item.category];
+
+            const handleDetailsClick = (e) => {
+                e.stopPropagation();
+                onShowDetails(item);
+            };
+
+            return (
+                <div className="group h-52 w-full cursor-pointer [perspective:1000px]" onClick={() => setIsFlipped(!isFlipped)}>
+                    <div className={`relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] rounded-2xl ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+                        {/* Front Side */}
+                        <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 text-center rounded-2xl border [backface-visibility:hidden] bg-darkCard ${cat.borderColor} ${cat.glowClass}`}>
+                            <div className="mb-2 opacity-40">
+                                <Sparkles size={20} style={{ color: cat.neonColor }} />
+                            </div>
+                            <h3 className={`text-xl font-bold tracking-tight ${cat.textClass}`}>{item.title}</h3>
+                            <span className="mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-500 border border-white/10">{cat.label}</span>
+                            <p className="mt-4 text-[10px] font-semibold uppercase text-gray-600">Toque para ver a definição</p>
                         </div>
 
                         {/* Back Side */}
-                        <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center rounded-2xl border-2 bg-white text-slate-800 [transform:rotateY(180deg)] [backface-visibility:hidden]`}>
-                            <p className="text-md font-medium leading-relaxed">{item.description}</p>
+                        <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center rounded-2xl border bg-darkSurface ${cat.borderColor} [transform:rotateY(180deg)] [backface-visibility:hidden] ${cat.glowClass}`}>
+                            <p className="text-sm font-medium leading-relaxed text-gray-300 mb-4">{item.description}</p>
+                            <button onClick={handleDetailsClick}
+                                className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border transition-all duration-200 hover:scale-105"
+                                style={{
+                                    color: cat.neonColor,
+                                    borderColor: cat.neonColor + '50',
+                                    backgroundColor: cat.neonColor + '15',
+                                    boxShadow: `0 0 15px ${cat.neonColor}20`
+                                }}>
+                                <ExternalLink size={12} />
+                                Mais Detalhes
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -258,6 +894,7 @@
 
         function App() {
             const [searchTerm, setSearchTerm] = useState('');
+            const [selectedConcept, setSelectedConcept] = useState(null);
 
             const filteredConcepts = concepts.filter(c =>
                 c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -265,31 +902,31 @@
             );
 
             return (
-                <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12">
+                <div className="min-h-screen bg-darkBg text-gray-100 font-sans pb-12">
                     {/* Header */}
-                    <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+                    <header className="bg-darkSurface/80 backdrop-blur-md border-b border-white/10 sticky top-0 z-10">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 flex-wrap">
                                 <div className="flex items-center gap-3">
-                                    <div className="bg-indigo-600 p-2 rounded-lg text-white">
-                                        <Brain size={24} />
+                                    <div className="p-2 rounded-lg border border-neonCyan/30 neon-glow-cyan">
+                                        <Brain size={24} className="text-neonCyan" />
                                     </div>
-                                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                                    <h1 className="text-2xl font-bold neon-text-cyan">
                                         30 Conceitos de LLM
                                     </h1>
                                 </div>
 
                                 <a href="https://github.com/andrecorumba/llm-concepts" target="_blank" rel="noopener noreferrer"
-                                    className="text-slate-500 hover:text-slate-800 transition-colors" title="Ver no GitHub">
+                                    className="text-gray-500 hover:text-neonCyan transition-colors" title="Ver no GitHub">
                                     <Github size={24} />
                                 </a>
 
                                 <div className="relative w-full md:w-96">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                                         <Search size={18} />
                                     </div>
                                     <input type="text" placeholder="Buscar conceito ou definição..."
-                                        className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-full leading-5 bg-slate-100 placeholder-slate-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 transition duration-150 ease-in-out sm:text-sm"
+                                        className="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-full leading-5 bg-white/5 placeholder-gray-600 text-gray-200 focus:outline-none focus:bg-white/10 focus:ring-2 focus:ring-neonCyan/50 focus:border-neonCyan/30 transition duration-150 ease-in-out sm:text-sm"
                                         value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                                     />
                                 </div>
@@ -302,33 +939,34 @@
 
                         {/* Intro Text */}
                         <div className="mb-8 text-center max-w-2xl mx-auto">
-                            <h2 className="text-lg text-slate-600">
+                            <h2 className="text-lg text-gray-400">
                                 Explore os fundamentos da Inteligência Artificial Generativa.
                             </h2>
-                            <p className="text-sm text-slate-400 mt-2">Clique nos cartões para revelar o significado.</p>
+                            <p className="text-sm text-gray-600 mt-2">Clique nos cartões para revelar o significado.</p>
                         </div>
 
                         {/* Categories Legend */}
-                        <div className="flex flex-wrap justify-center gap-3 mb-8 text-xs font-medium text-slate-500">
-                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-rose-400"></span> Fundamentos</span>
-                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-amber-400"></span> Treinamento</span>
-                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-sky-400"></span> Prompts</span>
-                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-purple-400"></span> Inferência</span>
-                            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-emerald-400"></span> Aplicação</span>
+                        <div className="flex flex-wrap justify-center gap-4 mb-8 text-xs font-medium text-gray-500">
+                            {Object.entries(categoryConfig).map(([key, cat]) => (
+                                <span key={key} className="flex items-center gap-1.5">
+                                    <span className={`w-2.5 h-2.5 rounded-full ${cat.dotColor}`} style={{ boxShadow: `0 0 6px ${cat.neonColor}80` }}></span>
+                                    {cat.label}
+                                </span>
+                            ))}
                         </div>
 
                         {filteredConcepts.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredConcepts.map((item, index) => (
-                                    <FlipCard key={index} item={item} />
+                                    <FlipCard key={index} item={item} onShowDetails={setSelectedConcept} />
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-20 text-slate-400">
+                            <div className="text-center py-20 text-gray-600">
                                 <Search size={48} className="mx-auto mb-4 opacity-20" />
-                                <p className="text-lg">Nenhum conceito encontrado para "{searchTerm}"</p>
+                                <p className="text-lg">Nenhum conceito encontrado para "<span className="text-neonCyan">{searchTerm}</span>"</p>
                                 <button onClick={() => setSearchTerm('')}
-                                    className="mt-4 text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-2 mx-auto"
+                                    className="mt-4 text-neonCyan hover:text-neonCyan/80 font-medium flex items-center gap-2 mx-auto"
                                 >
                                     <RefreshCw size={16} /> Limpar busca
                                 </button>
@@ -336,9 +974,14 @@
                         )}
                     </main>
 
-                    <footer className="max-w-7xl mx-auto px-4 py-6 text-center text-slate-400 text-sm border-t border-slate-200 mt-8">
+                    <footer className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-600 text-sm border-t border-white/5 mt-8">
                         <p>© 2026 Guia LLM Interativo.</p>
                     </footer>
+
+                    {/* Detail Modal */}
+                    {selectedConcept && (
+                        <DetailModal concept={selectedConcept} onClose={() => setSelectedConcept(null)} />
+                    )}
                 </div>
             );
         }
@@ -352,4 +995,3 @@
 </body>
 
 </html>
-```
